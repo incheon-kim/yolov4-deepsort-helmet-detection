@@ -2,11 +2,9 @@
 __pycache__
 *.pyc
 
-# image, videos
+# videos
 *.mp4
 *.avi
-*.jpg
-*.png
 
 # darknet weight files
 *.weights
@@ -16,3 +14,6 @@ __pycache__
 *.so
 *.lib
 *.a
+
+# image output directory
+output
