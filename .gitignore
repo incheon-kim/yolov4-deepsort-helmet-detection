@@ -1,0 +1,18 @@
+# py caches
+__pycache__
+*.pyc
+
+# image, videos
+*.mp4
+*.avi
+*.jpg
+*.png
+
+# darknet weight files
+*.weights
+
+# shared object, static/dynamic library files
+*.dll
+*.so
+*.lib
+*.a

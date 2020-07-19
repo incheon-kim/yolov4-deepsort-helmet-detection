@@ -1,0 +1,6 @@
+classes= 3
+train  = train/train.txt
+valid  = valid/valid.txt
+names = configs/yolov4-helmet-detection.names
+backup = backup/
+eval=coco
