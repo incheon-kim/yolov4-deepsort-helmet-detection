@@ -51,8 +51,7 @@ python detectandtrack.py
 
 
 ## example
-![](example1.jpg)
-
+![](example.gif)
 ---
 
 ## citation
