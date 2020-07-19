@@ -57,5 +57,7 @@ python detectandtrack.py
 
 ## citation
 https://github.com/AlexeyAB/darknet
+
 https://github.com/theAIGuysCode/yolov3_deepsort
+
 https://public.roboflow.ai/object-detection/hard-hat-workers
