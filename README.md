@@ -1,4 +1,5 @@
 # Yolov4-deepsort-helmet-detection
+[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fincheon-kim%2Fyolov4-deepsort-helmet-detection)](https://hits.seeyoufarm.com)
 
 helmet(hard hat) detector trained with [darknet framework](https://github.com/AlexeyAB/darknet) YOLOv4 model.
 
