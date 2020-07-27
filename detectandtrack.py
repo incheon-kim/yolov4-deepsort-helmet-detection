@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 import time
 import darknet
-
+from datetime import datetime
 import matplotlib.pyplot as plt
 from deep_sort import preprocessing
 from deep_sort import nn_matching
@@ -84,12 +84,13 @@ def YOLO(videopath):
         except Exception:
             pass
 
+    if not os.path.exists("outputs"):
+        os.mkdir("outputs")
     """
     DeepSORT Parameters
     """
-    max_cosine_distance = 0.3
+    max_cosine_distance = 0.5
     nn_budget = None
-    nms_max_overlap = 1.0
 
     # load DeepSORT model
     sort_model_file = "model_data/mars-small128.pb"
@@ -99,7 +100,28 @@ def YOLO(videopath):
 
     # load video file / streams
     cap = cv2.VideoCapture(videopath)
+    original_fps = cap.get(cv2.CAP_PROP_FPS)
+    original_dimension = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
 
+    print(original_fps, original_dimension)
+    # create head detection result saving directory
+    filename = videopath.split(".")[0].split("/")[1]
+    directory = os.path.join(os.getcwd(), "outputs", filename)
+    if not os.path.exists(directory):
+        os.mkdir(directory)
+    
+    # create video output directory
+    out_directory = os.path.join(os.getcwd(), "outputs", "video")
+    if not os.path.exists(out_directory):
+        os.mkdir(out_directory)
+        
+    # create VideoWriter for output video
+    out_write = cv2.VideoWriter( os.path.join(out_directory, filename+"_processed.mp4")
+                               , cv2.VideoWriter_fourcc(*'MP4V')
+                               , original_fps
+                               , original_dimension
+                               )
+    
     print("Starting the YOLO loop...")
 
     # Create an image we reuse for each detect
@@ -138,7 +160,6 @@ def YOLO(videopath):
             boxs = np.array([d.tlwh for d in detections])
             scores = np.array([d.confidence for d in detections])
             classes = np.array([d.class_name for d in detections])
-            #indices = preprocessing.non_max_suppression(boxs, classes, nms_max_overlap, scores)
 
             tracker.predict()
             tracker.update(detections)
@@ -170,7 +191,8 @@ def YOLO(videopath):
                 mask_frame = frame_rgb.copy()
                 ALPHA = 0.4
                 cv2.rectangle(mask_frame, (xmin, ymin-10), (xmin+(len(class_name)+len(str(track.track_id)))*9, ymin), color, -1)
-                cv2.putText(mask_frame, f"{class_name} - {track.track_id}", (xmin, ymin-4), cv2.FONT_HERSHEY_SIMPLEX, 0.25, (255,255,255))
+                text_color = (255,255,255) if class_name == "helmet" else (0,0,0)
+                cv2.putText(mask_frame, f"{class_name} - {track.track_id}", (xmin, ymin-4), cv2.FONT_HERSHEY_SIMPLEX, 0.25, text_color)
                 frame_rgb = cv2.addWeighted(mask_frame, ALPHA, frame_rgb, 1 - ALPHA, 0)
                 
                 # draw bounding box
@@ -180,7 +202,9 @@ def YOLO(videopath):
                 if FLAGS['SAVE_ON_NEW_HEAD'] and class_name == 'head' and track.track_id not in head_set:
                     head_set.add(track.track_id)
                     print("new head detected")
-                    cv2.imwrite(f"./output/{videopath}-{track.track_id}.jpg", cv2.hconcat([frame_read, cv2.cvtColor(frame_rgb, cv2.COLOR_BGR2RGB)]))
+                    savePath = os.path.join(os.getcwd(), "outputs", filename, f"{track.track_id}_{datetime.now().strftime('%Y_%m_%d %H_%M_%S')}.jpg")
+                    print(savePath)
+                    cv2.imwrite(savePath, cv2.hconcat([frame_read, cv2.cvtColor(frame_rgb, cv2.COLOR_BGR2RGB)]))
 
             # draw fps
             if FLAGS['SHOW_FPS']:
@@ -192,16 +216,20 @@ def YOLO(videopath):
             if FLAGS['SHOW_ORIGINAL_IMAGE']:
                 cv2.imshow('Original', frame_read)
 
-            cv2.imshow('Video', cv2.cvtColor(frame_rgb, cv2.COLOR_BGR2RGB))
-
+            result_frame = cv2.cvtColor(frame_rgb, cv2.COLOR_BGR2RGB)
+            # show result video
+            cv2.imshow('Video', result_frame)
+            # save result video
+            out_write.write(result_frame)
             # press 'q' to quit
             if cv2.waitKey(1) == ord('q'):
                 break
         else:
             break
     cap.release()
+    out_write.release()
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     # file name goes here
-    YOLO("const_example.mp4")
+    YOLO("test_videos/example2.mp4")
