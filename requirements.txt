@@ -1,5 +1,5 @@
-numpy=1.18.5
+numpy==1.18.5
 opencv-python==4.3.0.36
 scikit-image==0.17.2
 sklearn
-tensorflow==2.2.0
+tensorflow>=2.4.0
